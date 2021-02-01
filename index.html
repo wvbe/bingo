@@ -1,49 +1,48 @@
 <html>
 
   <style type="text/css">
-	/*<![CDATA[*/
-	table {
-		width: 75%;
-		font-size:5rem;
-		text-align:center;
-	}
-	th {
-		background-color: hotpink
-	}
-	td.clickable{
-		cursor: pointer;
-	}
-	td.gratis {
-		font-size: 2rem
-	}
-	td.bleep::before {
-		content:'';
-		border-radius: 50%;
-		width: 1em;
-		height: 1em;
-		background-color:red;
-		z-index:-1;
-		display:inline-block;
-		position:absolute;
-		align:center
-	}
-	/*]]>*/
+    /*<![CDATA[*/
+    table {
+        width: 75%;
+        font-size:5rem;
+        text-align:center;
+    }
+    th {
+        background-color: hotpink
+    }
+    td.clickable{
+        cursor: pointer;
+    }
+    td.gratis {
+        font-size: 2rem
+    }
+    td.clicked::before {
+        content:'';
+        border-radius: 50%;
+        width: 1em;
+        height: 1em;
+        background-color:red;
+        z-index:-1;
+        display:inline-block;
+        position:absolute;
+        align:center
+    }
+    /*]]>*/
   </style>
 
   <body>
     <h1 id="header">please turn on javascript</h1>
-	<button onclick="reset()">RESET</button>
+    <button onclick="reset()">RESET</button>
     <table id="table">
-	  <thead><tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr></thead>
-	  <tbody>
-	  </tbody>
-	</table>
+      <thead><tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr></thead>
+      <tbody>
+      </tbody>
+    </table>
   </body>
 
   <script type="text/javascript">
-	//<![CDATA[
+    //<![CDATA[
     let seed = window.location.search.substr(1);
-	;
 
     if (!seed) {
         seed = prompt('Please gib seed. name or sumthing is gud. be original');
@@ -51,80 +50,79 @@
     }
 
     const header = document.getElementById('header');
-    header.innerText = `Your seed is "${seed}"! It has ${seed.length} characters! It is case sensitive lol`;
+    header.innerText = `Your seed is "${seed}"! It has ${seed.length} characters! It is case sensitive.`;
 
-	function reset () {
-		window.localStorage.removeItem('bingo');
-		window.location.search='';
-		window.location.reload();
-	}
+    function reset () {
+        window.localStorage.removeItem('bingo');
+        window.location.search='';
+        window.location.reload();
+    }
 
-    // Generate a hash of the seed
-    function murmurhash3 (str) {
-		for(var i = 0, h = 1779033703 ^ str.length; i < str.length; i++)
-            h = Math.imul(h ^ str.charCodeAt(i), 3432918353),
-        h = h << 13 | h >>> 19;
-        return function () {
-            h = Math.imul(h ^ h >>> 16, 2246822507);
-            h = Math.imul(h ^ h >>> 13, 3266489909);
-            return (h ^= h >>> 16) >>> 0;
-        }
+    // Seed a prng with the chosen seed. This is a linear congruential generator
+    const m = 134456;
+    const a = 8121;
+    const c = 28411;
+
+    let iseed = 0;
+    for (let i = 0; i < seed.length; ++i) {
+        iseed += seed.charCodeAt(i);
+    }
+    // Modulo it back to be in range
+    iseed = iseed % m;
+
+    function random () {
+        iseed = (a*iseed + c) % m;
+        return iseed;
     }
 
     const table = document.getElementById('table');
-	const tbody = table.lastElementChild;
+    const tbody = table.lastElementChild;
 
     function clik (cell) {
-        cell.classList.toggle('bleep')
+        cell.classList.toggle('clicked')
 
         const values = Array.from(tbody.children)
-    		  .reduce((cells, row) => cells.concat(Array.from(row.children)), [])
-    		  .map(cell=>cell.classList.contains('bleep') ? 1 : 0);
+              .reduce((cells, row) => cells.concat(Array.from(row.children)), [])
+              .map(cell=>cell.classList.contains('clicked') ? 1 : 0);
 
-		window.localStorage.setItem('bingo', `${values.join(',')}`);
-	}
+        window.localStorage.setItem('bingo', `${values.join(',')}`);
+    }
 
-	let random = murmurhash3(seed);
-	const taken = new Set();
+    const taken = new Set();
     for (let i = 0; i < 5; ++i) {
         const row = tbody.appendChild(document.createElement('tr'));
         for (let j = 0; j < 5; ++j) {
-         	const cell = row.appendChild(document.createElement('td'));
-			if (j === i && j === 2) {
-				cell.innerText = 'Gratis'
-				cell.classList.add('gratis');
-				continue;
-			}
-			cell.classList.add('clickable');
-			let number;
-			do {
-				number = random() % 15 + j * 15 + 1;
+            const cell = row.appendChild(document.createElement('td'));
+            if (j === i && j === 2) {
+                cell.innerText = 'Gratis'
+                cell.classList.add('gratis');
+                continue;
+            }
+            cell.classList.add('clickable');
+            let number;
+            do {
+                number = random() % 15 + j * 15 + 1;
+                console.log(number);
+                cell.innerText = number;
+            } while (taken.has(number));
+            taken.add(number);
 
-				cell.innerText = number;
-			} while (taken.has(number));
-			taken.add(number);
-
-			cell.addEventListener('click', clik.bind(undefined, cell));
+            cell.addEventListener('click', clik.bind(undefined, cell));
         }
     }
 
-	const initialValues = window.localStorage.getItem('bingo');
-	console.log(initialValues);
-	if (initialValues) {
-
-		let i = 0;
-		for (const val of initialValues.split(',')) {
-			if (val ==='0') {
-				++i;
-				continue;
-			}
-			tbody.children[Math.floor(i/5)].children[i%5].classList.add('bleep');
-			++i;
-		}
-	}
-	//]]>
+    const initialValues = window.localStorage.getItem('bingo');
+    if (initialValues) {
+        let i = 0;
+        for (const val of initialValues.split(',')) {
+            if (val ==='0') {
+                ++i;
+                continue;
+            }
+            tbody.children[Math.floor(i/5)].children[i%5].classList.add('clicked');
+            ++i;
+        }
+    }
+    //]]>
   </script>
-
-
-
 </html>
