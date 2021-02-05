@@ -97,11 +97,11 @@
     <table id="info">
       <tr>
         <td><h1 id="header">Please turn on javascript</h1></td>
-        <td><button onclick="reset()">Reset BingoCard</button></td>
+        <td><button onclick="reset()">Reset fontop0mpCard</button></td>
       </tr>
 
       <table id="table" border="1">
-        <thead><tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr></thead>
+        <thead><tr><th>f</th><th>o</th><th>n</th><th>t</th><th>o</th><th>p</th><th>0</th><th>m</th><th>p</th></tr></thead>
         <tbody>
         </tbody>
       </table>
@@ -120,7 +120,7 @@
     header.innerText = `Your seed is "${seed}"! It has ${seed.length} characters! It is case sensitive.`;
 
     function reset () {
-        window.localStorage.removeItem('bingo');
+        window.localStorage.removeItem('fontop0mp');
         window.location.search='';
         window.location.reload();
     }
@@ -152,13 +152,13 @@
               .reduce((cells, row) => cells.concat(Array.from(row.children)), [])
               .map(cell=>cell.classList.contains('clicked') ? 1 : 0);
 
-        window.localStorage.setItem('bingo', `${values.join(',')}`);
+        window.localStorage.setItem('fontop0mp', `${values.join(',')}`);
     }
 
     const taken = new Set();
-    for (let i = 0; i < 5; ++i) {
+    for (let i = 0; i < 9; ++i) {
         const row = tbody.appendChild(document.createElement('tr'));
-        for (let j = 0; j < 5; ++j) {
+        for (let j = 0; j < 9; ++j) {
             const cell = row.appendChild(document.createElement('td'));
             if (j === i && j === 2) {
                 cell.innerText = 'Gratis'
@@ -178,7 +178,7 @@
         }
     }
 
-    const initialValues = window.localStorage.getItem('bingo');
+    const initialValues = window.localStorage.getItem('fontop0mp');
     if (initialValues) {
         let i = 0;
         for (const val of initialValues.split(',')) {
